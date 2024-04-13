@@ -39,7 +39,12 @@ teacher_image.fill(BLUE)
 wall_image = pygame.Surface((ROOM_SIZE, ROOM_SIZE))
 wall_image.fill(BLACK)
 
-# Define Player class
+class GreyRectangle(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.Surface((10, 10))  # Adjust size as needed
+        self.image.fill((128, 128, 128))  # Grey color
+        self.rect = self.image.get_rect(topleft=(x, y))
 
 class Monster(pygame.sprite.Sprite):
     def __init__(self, x, y, player):
@@ -175,6 +180,7 @@ def play_game():
     # Create tunnels and walls
     tunnels = pygame.sprite.Group()
     walls = pygame.sprite.Group()
+    grey_rectangles = pygame.sprite.Group()
     for i in range(5):
         for j in range(5):
             x = i * (ROOM_SIZE + ROOM_MARGIN)
@@ -185,7 +191,9 @@ def play_game():
             else:  # Create wall
                 wall = Wall(x, y)
                 walls.add(wall)
-
+            # Create grey rectangle
+            grey_rect = GreyRectangle(random.randint(x, x + ROOM_SIZE), random.randint(y, y + ROOM_SIZE))
+            grey_rectangles.add(grey_rect)
     # Create player
     player = Player(WIDTH // 2, HEIGHT // 2)
     all_sprites = pygame.sprite.Group()
@@ -201,7 +209,12 @@ def play_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
+                
+        # Check for collisions with grey rectangles
+        collided_grey_rectangles = pygame.sprite.spritecollide(player, grey_rectangles, True)
+        for grey_rect in collided_grey_rectangles:
+            # Remove grey rectangle from the group
+            grey_rectangles.remove(grey_rect)
         # Get key presses
         keys = pygame.key.get_pressed()
         dx = ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) - (keys[pygame.K_LEFT] or keys[pygame.K_a])) * PLAYER_SPEED
@@ -227,17 +240,32 @@ def play_game():
 
         # Draw everything with camera offset
         screen.fill(WHITE)
+
+        #tunnels
         for tunnel in tunnels:
             tunnel_rect = tunnel.rect.move(-camera_offset_x, -camera_offset_y)
             if screen.get_rect().colliderect(tunnel_rect):
                 pygame.draw.rect(screen, WHITE, tunnel_rect)
+
+        #walls
         for wall in walls:
             wall_rect = wall.rect.move(-camera_offset_x, -camera_offset_y)
             if screen.get_rect().colliderect(wall_rect):
                 screen.blit(wall.image, wall_rect)
+
+        #trash
+        for grey_rect in grey_rectangles:  # Draw grey rectangles after walls and tunnels
+            grey_rect_rect = grey_rect.rect.move(-camera_offset_x, -camera_offset_y)
+            if screen.get_rect().colliderect(grey_rect_rect):
+                screen.blit(grey_rect.image, grey_rect_rect)      
+
         player_rect = player.rect.move(-camera_offset_x, -camera_offset_y)
+
+        #player
         if screen.get_rect().colliderect(player_rect):
             screen.blit(player.image, player_rect)
+
+        #monster
         monster_rect = monster.rect.move(-camera_offset_x, -camera_offset_y)
         if screen.get_rect().colliderect(monster_rect):
             screen.blit(monster.image, monster_rect)
