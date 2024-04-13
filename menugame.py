@@ -52,7 +52,10 @@ class HealthBar():
         pygame.draw.rect(surface,"green",(self.x, self.y, self.w * ratio, self.h))
 
     def increase_health(self):
-        self.h = self.h + 10
+        if self.h + 10 >= self.max_h:
+            self.h = self.max_h
+        else:
+            self.h = self.h + 10
 
 class GreyRectangle(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -219,7 +222,7 @@ def play_game():
     all_sprites.add(monster)
 
     #added healthbar
-    health = HealthBar(250, 200, 300, 40, 100)
+    health = HealthBar(250, 200, 300, 10, 100)
     
     # Main loop
     running = True
