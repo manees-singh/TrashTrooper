@@ -221,6 +221,14 @@ def play_game():
             # Create grey rectangle
             grey_rect = GreyRectangle(random.randint(x, x + ROOM_SIZE), random.randint(y, y + ROOM_SIZE))
             grey_rectangles.add(grey_rect)
+
+    for i in range(-50,50):
+        for j in range(-50,50):
+            x = i * (ROOM_SIZE + ROOM_MARGIN)
+            y = j * (ROOM_SIZE + ROOM_MARGIN)
+            # Create grey rectangle
+            grey_rect = GreyRectangle(random.randint(x, x + ROOM_SIZE), random.randint(y, y + ROOM_SIZE))
+            grey_rectangles.add(grey_rect)
     # Create player
     player = Player(WIDTH // 2, HEIGHT // 2)
     all_sprites = pygame.sprite.Group()
