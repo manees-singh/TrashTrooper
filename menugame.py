@@ -74,7 +74,7 @@ class Tunnel(pygame.sprite.Sprite):
 
 #Define Button class
 class Button:
-    def __init__(self, x, y, w, h, color, text):
+    def __init__(self, x, y, w, h, color, text=''):
         self.rect = pygame.Rect(x, y, w, h)
         self.x = x
         self.y = y
@@ -145,8 +145,8 @@ def play_game():
 
         # Get key presses
         keys = pygame.key.get_pressed()
-        dx = (keys[pygame.K_RIGHT] - keys[pygame.K_LEFT]) * PLAYER_SPEED
-        dy = (keys[pygame.K_DOWN] - keys[pygame.K_UP]) * PLAYER_SPEED
+        dx = ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) - (keys[pygame.K_LEFT] or keys[pygame.K_a])) * PLAYER_SPEED
+        dy = ((keys[pygame.K_DOWN] or keys[pygame.K_s]) - (keys[pygame.K_UP] or keys[pygame.K_w])) * PLAYER_SPEED
         if keys[pygame.K_ESCAPE]:
             quit_game()
 
