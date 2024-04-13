@@ -44,12 +44,13 @@ class HealthBar():
         self.y=y
         self.w=w
         self.h=h
+        self.height = 20
         self.max_h=max_h
 
     def draw(self,surface):
         ratio= self.h/self.max_h
-        pygame.draw.rect(surface, "red",(self.x, self.y, self.w, self.h))
-        pygame.draw.rect(surface,"green",(self.x, self.y, self.w * ratio, self.h))
+        pygame.draw.rect(surface, "red",(self.x, self.y, self.w, self.height))
+        pygame.draw.rect(surface,"green",(self.x, self.y, self.w * ratio, self.height))
 
     def increase_health(self):
         if self.h + 10 >= self.max_h:
