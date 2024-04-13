@@ -74,13 +74,22 @@ class Tunnel(pygame.sprite.Sprite):
 
 #Define Button class
 class Button:
-    def __init__(self, x, y, w, h, color):
+    def __init__(self, x, y, w, h, color, text):
         self.rect = pygame.Rect(x, y, w, h)
+        self.x = x
+        self.y = y
+        self.width = w
+        self.height = h
         self.color = color
+        self.font = pygame.font.Font('freesansbold.ttf', 60)
+        self.text = self.font.render(text, True, WHITE, self.color)
+        self.text_rect = self.text.get_rect()
 
     #Draw the button
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
+        self.text_rect.center = (self.x + (self.width/2), self.y + (self.height/2))
+        screen.blit(self.text, self.text_rect)
 
     #Determine if the button is clicked
     def is_clicked(self):
@@ -91,7 +100,7 @@ class Button:
 #Define StartButton class
 class StartButton(Button):
     def __init__(self, x, y, w, h):
-        super().__init__(x, y, w, h, BLUE)
+        super().__init__(x, y, w, h, BLUE, 'START')
 
     #Start the game
     def action(self):
@@ -100,7 +109,7 @@ class StartButton(Button):
 #Define QuitButton class
 class QuitButton(Button):
     def __init__(self, x, y, w, h):
-        super().__init__(x, y, w, h, RED)
+        super().__init__(x, y, w, h, RED, 'QUIT')
 
     #Quit the game
     def action(self):
@@ -174,9 +183,16 @@ def start_menu():
     while True:
         screen.blit(background, (0, 0))
 
+        #Create header text
+        font = pygame.font.Font('freesansbold.ttf', 100)
+        text = font.render('OUR EPIC GAME', True, WHITE, BLACK)
+        text_rect = text.get_rect()
+        text_rect.center = (WIDTH / 2, HEIGHT / 4)
+        screen.blit(text, text_rect)
+
         #Create start and quit buttons
-        start_button = StartButton(100, 100, 25, 25)
-        quit_button = QuitButton(200, 200, 25, 25)
+        start_button = StartButton(WIDTH / 2 - 125, HEIGHT / 2 - 50, 250, 100)
+        quit_button = QuitButton(WIDTH / 2 - 125, HEIGHT / 4 * 3 - 50, 250, 100)
 
         #Draw start and quit buttons
         start_button.draw(screen)
