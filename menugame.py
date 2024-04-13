@@ -168,8 +168,8 @@ def play_game():
         player.update(dx, dy, walls)
 
         # Calculate camera offset based on player's position
-        camera_offset_x = max(min(player.rect.x - WIDTH // 2, ROOM_SIZE * 5 - WIDTH), 0)
-        camera_offset_y = max(min(player.rect.y - HEIGHT // 2, ROOM_SIZE * 5 - HEIGHT), 0)
+        camera_offset_x = player.rect.x - WIDTH // 2
+        camera_offset_y = player.rect.y - HEIGHT // 2
 
         # Draw everything with camera offset
         screen.fill(WHITE)
