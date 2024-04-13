@@ -84,11 +84,12 @@ class Button:
         self.y = y
         self.width = w
         self.height = h
+        self.start_color = color
         self.color = color
+        self.button_text = text
         self.font = pygame.font.Font('freesansbold.ttf', 60)
         self.text = self.font.render(text, True, WHITE, self.color)
         self.text_rect = self.text.get_rect()
-        self.mouse_pos = pygame.mouse.get_pos()
 
     #Draw the button
     def draw(self, screen):
@@ -96,11 +97,23 @@ class Button:
         self.text_rect.center = (self.x + (self.width/2), self.y + (self.height/2))
         screen.blit(self.text, self.text_rect)
 
+    #Change button color when mouse hovers over button
+    def hover(self):
+        mouse_pos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(mouse_pos):
+            self.color = MAGENTA
+            self.text = self.font.render(self.button_text, True, WHITE, MAGENTA)
+            self.draw(screen)
+        else:
+            self.color = self.start_color
+            self.text = self.font.render(self.button_text, True, WHITE, self.start_color)
+            self.draw(screen)
+
     #Determine if the button is clicked
     def is_clicked(self):
-        #mouse_pos = pygame.mouse.get_pos()
+        mouse_pos = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
-        return self.rect.collidepoint(self.mouse_pos) and click[0] == 1
+        return self.rect.collidepoint(mouse_pos) and click[0] == 1
 
 #Define StartButton subclass
 class StartButton(Button):
@@ -125,10 +138,12 @@ class ResumeButton(Button):
     def __init__(self, x, y, w, h):
         super().__init__(x, y, w, h, BLUE, 'RESUME')
 
+#Define OptionButton subclass
 class OptionsButton(Button):
     def __init__(self, x, y, w, h):
         super().__init__(x, y, w, h, GREEN, 'OPTIONS')
 
+#Play the game
 def play_game():
     # Create tunnels and walls
     tunnels = pygame.sprite.Group()
@@ -223,6 +238,11 @@ def start_menu():
         options_button.draw(screen)
         quit_button.draw(screen)
 
+        #Hover over buttons
+        start_button.hover()
+        options_button.hover()
+        quit_button.hover()
+
         #Perform button actions if clicked
         if start_button.is_clicked():
             running = False
@@ -266,6 +286,11 @@ def pause_menu():
         resume_button.draw(screen)
         options_button.draw(screen)
         quit_button.draw(screen)
+
+        #Hover over buttons
+        resume_button.hover()
+        options_button.hover()
+        quit_button.hover()
 
         #Perform button actions if clicked
         if resume_button.is_clicked():
