@@ -113,8 +113,7 @@ class QuitButton(Button):
 
     #Quit the game
     def action(self):
-        pygame.quit()
-        sys.exit()
+        quit_game()
 
 def play_game():
     # Create tunnels and walls
@@ -148,6 +147,8 @@ def play_game():
         keys = pygame.key.get_pressed()
         dx = (keys[pygame.K_RIGHT] - keys[pygame.K_LEFT]) * PLAYER_SPEED
         dy = (keys[pygame.K_DOWN] - keys[pygame.K_UP]) * PLAYER_SPEED
+        if keys[pygame.K_ESCAPE]:
+            quit_game()
 
         # Check for collisions before updating player position
         player.update(dx, dy, walls)
@@ -176,11 +177,19 @@ def play_game():
         # Cap the frame rate
         pygame.time.Clock().tick(60)
 
+#Quit the game
+def quit_game():
+    pygame.quit()
+    sys.exit()
+
 #Create the start menu
 def start_menu():
     #Set the background surface
     background = pygame.Surface(window)
+
+    running = True
     while True:
+        #Set background
         screen.blit(background, (0, 0))
 
         #Create header text
@@ -200,8 +209,10 @@ def start_menu():
 
         #Perform button actions if clicked
         if start_button.is_clicked():
+            running = False
             start_button.action()
         if quit_button.is_clicked():
+            running = False
             quit_button.action()
 
         #Close the window if required
