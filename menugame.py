@@ -82,6 +82,7 @@ class Monster(pygame.sprite.Sprite):
         self.player = player
         self.health = 100
         self.max_health = 100
+        self.speed = 3
 
     def draw_health_bar(self,camera_offset_x,camera_offset_y):
         # Calculate health bar dimensions
@@ -107,8 +108,8 @@ class Monster(pygame.sprite.Sprite):
         dy = self.player.rect.centery - self.rect.centery
         distance = max(abs(dx), abs(dy))  # get the maximum absolute distance
         if distance != 0:
-            dx = dx / distance
-            dy = dy / distance
+            dx = dx / distance * self.speed
+            dy = dy / distance * self.speed
 
         # Move monster towards player
         self.rect.x += dx
