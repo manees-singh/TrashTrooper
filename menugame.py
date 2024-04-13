@@ -103,17 +103,26 @@ class Monster(pygame.sprite.Sprite):
         return health_bar_surface, health_bar_rect
     
     def update(self):
-        # Calculate direction towards player
-        dx = self.player.rect.centerx - self.rect.centerx
-        dy = self.player.rect.centery - self.rect.centery
-        distance = max(abs(dx), abs(dy))  # get the maximum absolute distance
-        if distance != 0:
-            dx = dx / distance * self.speed
-            dy = dy / distance * self.speed
-
-        # Move monster towards player
-        self.rect.x += dx
-        self.rect.y += dy
+        # Calculate distance to player
+        distance_to_player = pygame.math.Vector2(self.player.rect.center) - pygame.math.Vector2(self.rect.center)
+        if distance_to_player.length() < 400:  # Adjust this threshold as needed
+            # Move towards player
+            if distance_to_player.length() == 0:
+                dx = 0
+                dy = 0
+            else:
+                dx = distance_to_player.x / distance_to_player.length() * self.speed
+                dy = distance_to_player.y / distance_to_player.length() * self.speed
+                self.rect.x += dx
+                self.rect.y += dy
+        else:
+            # Move randomly
+            if random.randint(1,9) == 1:
+                
+                self.rect.x += random.randint(-self.speed*2, self.speed*2)
+                self.rect.y += random.randint(-self.speed*2, self.speed*2)
+            else:
+                pass
         
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
