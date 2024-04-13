@@ -428,9 +428,9 @@ def start_menu():
         
         #Create header text
         font = pygame.font.Font('freesansbold.ttf', 100)
-        text = font.render('OUR EPIC GAME', True, WHITE, BLACK)
+        text = font.render('Trash Troopers', True, WHITE, BLACK)
         text_rect = text.get_rect()
-        text_rect.center = (WIDTH // 2, 50)
+        text_rect.center = (WIDTH // 2, 100)
         screen.blit(text, text_rect)
 
         #Create buttons
