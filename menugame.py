@@ -6,7 +6,9 @@ import random
 pygame.init()
 
 # Set up the screen
-WIDTH, HEIGHT = 800, 600
+screen_info = pygame.display.Info()
+WIDTH = screen_info.current_w
+HEIGHT = screen_info.current_h
 window = (WIDTH, HEIGHT)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Pygame Character Movement")
@@ -142,6 +144,9 @@ class ResumeButton(Button):
 class OptionsButton(Button):
     def __init__(self, x, y, w, h):
         super().__init__(x, y, w, h, GREEN, 'OPTIONS')
+
+    def action(self):
+        pass
 
 #Play the game
 def play_game():
