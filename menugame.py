@@ -38,6 +38,18 @@ teacher_image.fill(BLUE)
 
 wall_image = pygame.Surface((ROOM_SIZE, ROOM_SIZE))
 wall_image.fill(BLACK)
+class HealthBar():
+    def __init__(self, x, y, w,h, max_h):
+        self.x=x
+        self.y=y
+        self.w=w
+        self.h=h
+        self.max_h=max_h
+
+    def draw(self,surface):
+        ratio= self.h/self.max_h
+        pygame.draw.rect(surface, "red",(self.x, self.y, self.w, self.h))
+        pygame.draw.rect(surface,"green",(self.x, self.y, self.w * ratio, self.h))
 
 class GreyRectangle(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -202,9 +214,16 @@ def play_game():
     # Create monster
     monster = Monster(WIDTH // 3, HEIGHT // 3, player)
     all_sprites.add(monster)
+
+    #added healthbar
+    health = HealthBar(250, 200, 300, 40, 100)
+    
     # Main loop
     running = True
     while running:
+
+
+        
         # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -269,6 +288,12 @@ def play_game():
         monster_rect = monster.rect.move(-camera_offset_x, -camera_offset_y)
         if screen.get_rect().colliderect(monster_rect):
             screen.blit(monster.image, monster_rect)
+
+
+        
+        #add health bar
+        health.h=20
+        health.draw(screen)
         # Update display
         pygame.display.flip()
 
@@ -285,11 +310,17 @@ def start_menu():
     #Set the background surface
     background = pygame.Surface(window)
 
+
+    
     running = True
     while True:
+
+        
         #Set background
         screen.blit(background, (0, 0))
 
+        
+        
         #Create header text
         font = pygame.font.Font('freesansbold.ttf', 100)
         text = font.render('OUR EPIC GAME', True, WHITE, BLACK)
