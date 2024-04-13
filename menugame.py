@@ -40,6 +40,28 @@ wall_image = pygame.Surface((ROOM_SIZE, ROOM_SIZE))
 wall_image.fill(BLACK)
 
 # Define Player class
+
+class Monster(pygame.sprite.Sprite):
+    def __init__(self, x, y, player):
+        super().__init__()
+        self.image = pygame.Surface((PLAYER_SIZE + 10, PLAYER_SIZE + 10))  # slightly bigger than player
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect(center=(x, y))
+        self.player = player
+
+    def update(self):
+        # Calculate direction towards player
+        dx = self.player.rect.centerx - self.rect.centerx
+        dy = self.player.rect.centery - self.rect.centery
+        distance = max(abs(dx), abs(dy))  # get the maximum absolute distance
+        if distance != 0:
+            dx = dx / distance
+            dy = dy / distance
+
+        # Move monster towards player
+        self.rect.x += dx
+        self.rect.y += dy
+        
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -169,6 +191,9 @@ def play_game():
     all_sprites = pygame.sprite.Group()
     all_sprites.add(player)
 
+    # Create monster
+    monster = Monster(WIDTH // 3, HEIGHT // 3, player)
+    all_sprites.add(monster)
     # Main loop
     running = True
     while running:
@@ -187,9 +212,18 @@ def play_game():
         # Check for collisions before updating player position
         player.update(dx, dy, walls)
 
+        # Update monster position
+        monster.update()
+
         # Calculate camera offset based on player's position
         camera_offset_x = player.rect.x - WIDTH // 2
         camera_offset_y = player.rect.y - HEIGHT // 2
+
+
+        # Draw monster
+        monster_rect = monster.rect.move(-camera_offset_x, -camera_offset_y)
+        if screen.get_rect().colliderect(monster_rect):
+            screen.blit(monster.image, monster_rect)
 
         # Draw everything with camera offset
         screen.fill(WHITE)
@@ -204,7 +238,9 @@ def play_game():
         player_rect = player.rect.move(-camera_offset_x, -camera_offset_y)
         if screen.get_rect().colliderect(player_rect):
             screen.blit(player.image, player_rect)
-
+        monster_rect = monster.rect.move(-camera_offset_x, -camera_offset_y)
+        if screen.get_rect().colliderect(monster_rect):
+            screen.blit(monster.image, monster_rect)
         # Update display
         pygame.display.flip()
 
