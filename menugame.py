@@ -72,7 +72,27 @@ class Monster(pygame.sprite.Sprite):
         self.image.fill(GREEN)
         self.rect = self.image.get_rect(center=(x, y))
         self.player = player
+        self.health = 100
+        self.max_health = 100
 
+    def draw_health_bar(self,camera_offset_x,camera_offset_y):
+        # Calculate health bar dimensions
+        bar_width = 40
+        bar_height = 5
+        health_ratio = self.health / self.max_health
+        bar_width_current = int(bar_width * health_ratio)
+
+        # Create health bar surface
+        health_bar_surface = pygame.Surface((bar_width, bar_height))
+        health_bar_surface.fill(RED)
+        health_bar_surface.fill(GREEN, (0, 0, bar_width_current, bar_height))
+
+        # Position health bar above the monster
+        health_bar_rect = health_bar_surface.get_rect(center=(self.rect.centerx - camera_offset_x, self.rect.top-8 - camera_offset_y))
+
+        # Return the health bar surface and rectangle
+        return health_bar_surface, health_bar_rect
+    
     def update(self):
         # Calculate direction towards player
         dx = self.player.rect.centerx - self.rect.centerx
@@ -259,12 +279,7 @@ def play_game():
         camera_offset_x = player.rect.x - WIDTH // 2
         camera_offset_y = player.rect.y - HEIGHT // 2
 
-
-        # Draw monster
-        monster_rect = monster.rect.move(-camera_offset_x, -camera_offset_y)
-        if screen.get_rect().colliderect(monster_rect):
-            screen.blit(monster.image, monster_rect)
-
+        
         # Draw everything with camera offset
         screen.fill(WHITE)
 
@@ -298,6 +313,9 @@ def play_game():
             screen.blit(monster.image, monster_rect)
 
 
+        # Draw monster health bar
+        health_bar_surface, health_bar_rect = monster.draw_health_bar(camera_offset_x,camera_offset_y)
+        screen.blit(health_bar_surface, health_bar_rect)
         
         #add health bar
         health.draw(screen)
