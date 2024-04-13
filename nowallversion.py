@@ -181,8 +181,8 @@ class Button:
 
 #Define StartButton subclass
 class StartButton(Button):
-    def __init__(self, x, y, w, h):
-        super().__init__(x, y, w, h, BLUE, 'START')
+    def __init__(self, x, y, w, h, text='START'):
+        super().__init__(x, y, w, h, BLUE, text)
 
     #Start the game
     def action(self):
@@ -358,20 +358,45 @@ def play_game():
         pygame.time.Clock().tick(60)
 
 def game_over():
-    screen.fill(BLACK)
-   # Display game over text
-    font = pygame.font.Font('freesansbold.ttf', 64)
-    game_over_text = font.render('GAME OVER', True, RED)
-    game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-    screen.blit(game_over_text, game_over_rect)
-        # Update display
-    pygame.display.flip()
+    running = True
+    while running:
+        screen.fill(BLACK)
+        
+        #Display game over text
+        font = pygame.font.Font('freesansbold.ttf', 100)
+        game_over_text = font.render('GAME OVER', True, RED)
+        game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        screen.blit(game_over_text, game_over_rect)
 
-    # Wait for a moment before exiting (optional)
-    pygame.time.delay(2000)
+        #Create buttons
+        retry_button = StartButton(WIDTH // 3 - 150, HEIGHT // 4 * 3 - 60, 300, 120, 'RETRY')
+        quit_button = QuitButton(WIDTH // 3 * 2 - 150, HEIGHT // 4 * 3 - 60, 300, 120)
 
-    # Quit the game
-    quit_game()
+        #Draw buttons
+        retry_button.draw(screen)
+        quit_button.draw(screen)
+
+        #Hover over buttons
+        retry_button.hover()
+        quit_button.hover()
+
+        #Perform button actions if clicked
+        if retry_button.is_clicked():
+            running = False
+            retry_button.action()
+        if quit_button.is_clicked():
+            running = False
+            quit_button.action()
+
+        #Update display
+        pygame.display.flip()
+
+        #Close the window if required
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
 #Quit the game
 def quit_game():
     pygame.quit()
@@ -395,7 +420,7 @@ def start_menu():
         
         #Create header text
         font = pygame.font.Font('freesansbold.ttf', 100)
-        text = font.render('Trash Troopers', True, WHITE, BLACK)
+        text = font.render('TRASH TROOPERS', True, WHITE, BLACK)
         text_rect = text.get_rect()
         text_rect.center = (WIDTH // 2, 100)
         screen.blit(text, text_rect)
