@@ -58,6 +58,13 @@ class HealthBar():
         else:
             self.h = self.h + 10
 
+    def decrease_health(self):
+        if self.h - 1 <= 0:
+            self.h = 0
+            # Game over logic can be added here
+        else:
+            self.h -= 1
+
 class GreyRectangle(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -275,6 +282,11 @@ def play_game():
         # Update monster position
         monster.update()
 
+        if player.rect.colliderect(monster.rect):
+            # Decrease player's health
+            health.decrease_health()
+            if health.h <= 0:
+                game_over()
         # Calculate camera offset based on player's position
         camera_offset_x = player.rect.x - WIDTH // 2
         camera_offset_y = player.rect.y - HEIGHT // 2
@@ -325,6 +337,21 @@ def play_game():
         # Cap the frame rate
         pygame.time.Clock().tick(60)
 
+def game_over():
+    screen.fill(BLACK)
+   # Display game over text
+    font = pygame.font.Font('freesansbold.ttf', 64)
+    game_over_text = font.render('GAME OVER', True, RED)
+    game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    screen.blit(game_over_text, game_over_rect)
+        # Update display
+    pygame.display.flip()
+
+    # Wait for a moment before exiting (optional)
+    pygame.time.delay(2000)
+
+    # Quit the game
+    quit_game()
 #Quit the game
 def quit_game():
     pygame.quit()
