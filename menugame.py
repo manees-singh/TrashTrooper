@@ -97,7 +97,7 @@ class Button:
         click = pygame.mouse.get_pressed()
         return self.rect.collidepoint(mouse_pos) and click[0] == 1
 
-#Define StartButton class
+#Define StartButton subclass
 class StartButton(Button):
     def __init__(self, x, y, w, h):
         super().__init__(x, y, w, h, BLUE, 'START')
@@ -106,7 +106,7 @@ class StartButton(Button):
     def action(self):
         play_game()
 
-#Define QuitButton class
+#Define QuitButton subclass
 class QuitButton(Button):
     def __init__(self, x, y, w, h):
         super().__init__(x, y, w, h, RED, 'QUIT')
@@ -114,6 +114,11 @@ class QuitButton(Button):
     #Quit the game
     def action(self):
         quit_game()
+
+#Define ResumeButton subclass
+class ResumeButton(Button):
+    def __init__(self, x, y, w, h):
+        super().__init__(x, y, w, h, BLUE, 'RESUME')
 
 def play_game():
     # Create tunnels and walls
@@ -148,7 +153,7 @@ def play_game():
         dx = ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) - (keys[pygame.K_LEFT] or keys[pygame.K_a])) * PLAYER_SPEED
         dy = ((keys[pygame.K_DOWN] or keys[pygame.K_s]) - (keys[pygame.K_UP] or keys[pygame.K_w])) * PLAYER_SPEED
         if keys[pygame.K_ESCAPE]:
-            quit_game()
+            pause_menu()
 
         # Check for collisions before updating player position
         player.update(dx, dy, walls)
@@ -223,6 +228,49 @@ def start_menu():
 
         #Update the display
         pygame.display.update()
+
+#Create the start menu
+def pause_menu():
+    #Set the background surface
+    background = pygame.Surface(window)
+
+    running = True
+    while True:
+        #Set background
+        screen.blit(background, (0, 0))
+
+        #Create header text
+        font = pygame.font.Font('freesansbold.ttf', 100)
+        text = font.render('GAME PAUSED', True, WHITE, BLACK)
+        text_rect = text.get_rect()
+        text_rect.center = (WIDTH / 2, HEIGHT / 4)
+        screen.blit(text, text_rect)
+
+        #Create resume and quit buttons
+        resume_button = ResumeButton(WIDTH / 2 - 125, HEIGHT / 2 - 50, 250, 100)
+        quit_button = QuitButton(WIDTH / 2 - 125, HEIGHT / 4 * 3 - 50, 250, 100)
+
+        #Draw start and quit buttons
+        resume_button.draw(screen)
+        quit_button.draw(screen)
+
+        #Perform button actions if clicked
+        if resume_button.is_clicked():
+            running = False
+            return
+        if quit_button.is_clicked():
+            running = False
+            quit_button.action()
+
+        #Close the window if required
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        #Update the display
+        pygame.display.update()
+
 
 #Run the menu
 start_menu()
