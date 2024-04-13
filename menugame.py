@@ -258,7 +258,7 @@ def play_game():
 
     #added healthbar
     health = HealthBar(250, 200, 300, 10, 100)
-    
+    timer = pygame.time.get_ticks() #initial timer
     # Main loop
     running = True
     while running:
@@ -369,6 +369,14 @@ def play_game():
         health.draw(screen)
         # Update display
         pygame.display.flip()
+
+        current_time = pygame.time.get_ticks()
+        time_interval = 2000  # Interval in milliseconds (2 seconds)
+        if current_time - timer >= time_interval:
+            # Add a new grey rectangle
+            new_grey_rect = GreyRectangle(random.randint(0, WIDTH), random.randint(0, HEIGHT))
+            grey_rectangles.add(new_grey_rect)
+            timer = current_time  # Update the timer
 
         # Cap the frame rate
         pygame.time.Clock().tick(60)
