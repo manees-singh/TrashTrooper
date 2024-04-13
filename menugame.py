@@ -22,6 +22,7 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 CYAN = (0, 255, 255)
 MAGENTA = (255, 0, 255)
+GREY = (128,128,128)
 
 # Define constants
 PLAYER_SIZE = 20
@@ -75,8 +76,8 @@ class GreyRectangle(pygame.sprite.Sprite):
 class Monster(pygame.sprite.Sprite):
     def __init__(self, x, y, player):
         super().__init__()
-        self.image = pygame.Surface((PLAYER_SIZE + 10, PLAYER_SIZE + 10))  # slightly bigger than player
-        self.image.fill(GREEN)
+        self.image = pygame.Surface((PLAYER_SIZE + 15, PLAYER_SIZE + 15))  # slightly bigger than player
+        self.image.fill(GREY)
         self.rect = self.image.get_rect(center=(x, y))
         self.player = player
         self.health = 100
@@ -247,7 +248,12 @@ def play_game():
 
     # Create monster
     monster = Monster(WIDTH // 3, HEIGHT // 3, player)
+    monster2 = Monster(0, 0,player)
+    monster3 = Monster(WIDTH, HEIGHT, player)
+    
     all_sprites.add(monster)
+    all_sprites.add(monster2)
+    all_sprites.add(monster3)
 
     #added healthbar
     health = HealthBar(250, 200, 300, 10, 100)
@@ -281,8 +287,22 @@ def play_game():
 
         # Update monster position
         monster.update()
+        monster2.update()
+        monster3.update()
 
         if player.rect.colliderect(monster.rect):
+            # Decrease player's health
+            health.decrease_health()
+            if health.h <= 0:
+                game_over()
+
+        if player.rect.colliderect(monster2.rect):
+            # Decrease player's health
+            health.decrease_health()
+            if health.h <= 0:
+                game_over()
+
+        if player.rect.colliderect(monster3.rect):
             # Decrease player's health
             health.decrease_health()
             if health.h <= 0:
@@ -324,10 +344,25 @@ def play_game():
         if screen.get_rect().colliderect(monster_rect):
             screen.blit(monster.image, monster_rect)
 
+        monster_rect2 = monster2.rect.move(-camera_offset_x, -camera_offset_y)
+        if screen.get_rect().colliderect(monster_rect2):
+            screen.blit(monster2.image, monster_rect2)
+
+        monster_rect3 = monster3.rect.move(-camera_offset_x, -camera_offset_y)
+        if screen.get_rect().colliderect(monster_rect3):
+            screen.blit(monster3.image, monster_rect3)
+
 
         # Draw monster health bar
         health_bar_surface, health_bar_rect = monster.draw_health_bar(camera_offset_x,camera_offset_y)
         screen.blit(health_bar_surface, health_bar_rect)
+
+        health_bar_surface2, health_bar_rect2 = monster2.draw_health_bar(camera_offset_x,camera_offset_y)
+        screen.blit(health_bar_surface2, health_bar_rect2)
+
+        health_bar_surface3, health_bar_rect3 = monster3.draw_health_bar(camera_offset_x,camera_offset_y)
+        screen.blit(health_bar_surface3, health_bar_rect3)
+        
         
         #add health bar
         health.draw(screen)
