@@ -51,6 +51,9 @@ class HealthBar():
         pygame.draw.rect(surface, "red",(self.x, self.y, self.w, self.h))
         pygame.draw.rect(surface,"green",(self.x, self.y, self.w * ratio, self.h))
 
+    def increase_health(self):
+        self.h = self.h + 10
+
 class GreyRectangle(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -234,6 +237,7 @@ def play_game():
         for grey_rect in collided_grey_rectangles:
             # Remove grey rectangle from the group
             grey_rectangles.remove(grey_rect)
+            health.increase_health()
         # Get key presses
         keys = pygame.key.get_pressed()
         dx = ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) - (keys[pygame.K_LEFT] or keys[pygame.K_a])) * PLAYER_SPEED
@@ -292,7 +296,6 @@ def play_game():
 
         
         #add health bar
-        health.h=20
         health.draw(screen)
         # Update display
         pygame.display.flip()
