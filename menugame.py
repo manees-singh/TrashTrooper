@@ -15,7 +15,11 @@ pygame.display.set_caption("Pygame Character Movement")
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+CYAN = (0, 255, 255)
+MAGENTA = (255, 0, 255)
 
 # Define constants
 PLAYER_SIZE = 20
@@ -84,6 +88,7 @@ class Button:
         self.font = pygame.font.Font('freesansbold.ttf', 60)
         self.text = self.font.render(text, True, WHITE, self.color)
         self.text_rect = self.text.get_rect()
+        self.mouse_pos = pygame.mouse.get_pos()
 
     #Draw the button
     def draw(self, screen):
@@ -93,9 +98,9 @@ class Button:
 
     #Determine if the button is clicked
     def is_clicked(self):
-        mouse_pos = pygame.mouse.get_pos()
+        #mouse_pos = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
-        return self.rect.collidepoint(mouse_pos) and click[0] == 1
+        return self.rect.collidepoint(self.mouse_pos) and click[0] == 1
 
 #Define StartButton subclass
 class StartButton(Button):
@@ -119,6 +124,10 @@ class QuitButton(Button):
 class ResumeButton(Button):
     def __init__(self, x, y, w, h):
         super().__init__(x, y, w, h, BLUE, 'RESUME')
+
+class OptionsButton(Button):
+    def __init__(self, x, y, w, h):
+        super().__init__(x, y, w, h, GREEN, 'OPTIONS')
 
 def play_game():
     # Create tunnels and walls
@@ -201,15 +210,17 @@ def start_menu():
         font = pygame.font.Font('freesansbold.ttf', 100)
         text = font.render('OUR EPIC GAME', True, WHITE, BLACK)
         text_rect = text.get_rect()
-        text_rect.center = (WIDTH / 2, HEIGHT / 4)
+        text_rect.center = (WIDTH // 2, 50)
         screen.blit(text, text_rect)
 
-        #Create start and quit buttons
-        start_button = StartButton(WIDTH / 2 - 125, HEIGHT / 2 - 50, 250, 100)
-        quit_button = QuitButton(WIDTH / 2 - 125, HEIGHT / 4 * 3 - 50, 250, 100)
+        #Create buttons
+        start_button = StartButton(WIDTH // 2 - 150, HEIGHT // 4 - 60, 300, 120)
+        options_button = OptionsButton(WIDTH // 2 - 150, HEIGHT // 2 - 60, 300, 120)
+        quit_button = QuitButton(WIDTH // 2 - 150, HEIGHT // 4 * 3 - 60, 300, 120)
 
-        #Draw start and quit buttons
+        #Draw buttons
         start_button.draw(screen)
+        options_button.draw(screen)
         quit_button.draw(screen)
 
         #Perform button actions if clicked
@@ -229,7 +240,7 @@ def start_menu():
         #Update the display
         pygame.display.update()
 
-#Create the start menu
+#Create the pause menu
 def pause_menu():
     #Set the background surface
     background = pygame.Surface(window)
@@ -243,15 +254,17 @@ def pause_menu():
         font = pygame.font.Font('freesansbold.ttf', 100)
         text = font.render('GAME PAUSED', True, WHITE, BLACK)
         text_rect = text.get_rect()
-        text_rect.center = (WIDTH / 2, HEIGHT / 4)
+        text_rect.center = (WIDTH // 2, 50)
         screen.blit(text, text_rect)
 
-        #Create resume and quit buttons
-        resume_button = ResumeButton(WIDTH / 2 - 125, HEIGHT / 2 - 50, 250, 100)
-        quit_button = QuitButton(WIDTH / 2 - 125, HEIGHT / 4 * 3 - 50, 250, 100)
+        #Create buttons
+        resume_button = ResumeButton(WIDTH // 2 - 150, HEIGHT // 4 - 60, 300, 120)
+        options_button = OptionsButton(WIDTH // 2 - 150, HEIGHT // 2 - 60, 300, 120)
+        quit_button = QuitButton(WIDTH // 2 - 150, HEIGHT // 4 * 3 - 60, 300, 120)
 
-        #Draw start and quit buttons
+        #Draw buttons
         resume_button.draw(screen)
+        options_button.draw(screen)
         quit_button.draw(screen)
 
         #Perform button actions if clicked
@@ -270,7 +283,6 @@ def pause_menu():
 
         #Update the display
         pygame.display.update()
-
 
 #Run the menu
 start_menu()
