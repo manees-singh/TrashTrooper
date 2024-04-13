@@ -13,6 +13,7 @@ pygame.display.set_caption("Pygame Character Movement")
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
 # Define constants
 PLAYER_SIZE = 20
@@ -23,6 +24,9 @@ PLAYER_SPEED = 5
 # Load images
 player_image = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE))
 player_image.fill(RED)
+
+teacher_image = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE))
+teacher_image.fill(BLUE)
 
 # Define Player class
 class Player(pygame.sprite.Sprite):
@@ -40,18 +44,26 @@ class Player(pygame.sprite.Sprite):
 
 # Define Room class
 class Room(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, teacher_present=False):
         super().__init__()
         self.image = pygame.Surface((ROOM_SIZE, ROOM_SIZE))
         self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
+        self.teacher_present = teacher_present
+
+    def draw_teacher(self):
+        if self.teacher_present:
+            screen.blit(teacher_image, (self.rect.x - camera.x + ROOM_SIZE // 2 - PLAYER_SIZE // 2, self.rect.y - camera.y + ROOM_SIZE // 2 - PLAYER_SIZE // 2))
 
 # Create rooms
 rooms = pygame.sprite.Group()
-for i in range(3):
-    for j in range(3):
-        room = Room((ROOM_SIZE + ROOM_MARGIN) * i, (ROOM_SIZE + ROOM_MARGIN) * j)
+for i in range(5):
+    for j in range(5):
+        if (i, j) == (2, 2):  # Room with teacher
+            room = Room((ROOM_SIZE + ROOM_MARGIN) * i, (ROOM_SIZE + ROOM_MARGIN) * j, teacher_present=True)
+        else:
+            room = Room((ROOM_SIZE + ROOM_MARGIN) * i, (ROOM_SIZE + ROOM_MARGIN) * j)
         rooms.add(room)
 
 # Create player
@@ -94,6 +106,16 @@ while running:
     for room in rooms:
         if camera.colliderect(room.rect):
             screen.blit(room.image, (room.rect.x - camera.x, room.rect.y - camera.y))
+            room.draw_teacher()
+
+    # Check if the player is in the room with the teacher
+    player_room = pygame.sprite.spritecollideany(player, rooms)
+    if player_room and player_room.teacher_present:
+        # Display message
+        font = pygame.font.Font(None, 36)
+        text = font.render("Hello everyone!", True, WHITE)
+        text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        screen.blit(text, text_rect)
 
     # Draw player
     all_sprites.draw(screen)
