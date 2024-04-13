@@ -1,11 +1,12 @@
 import pygame
 import sys
+import random
 
 # Initialize Pygame
 pygame.init()
 
 # Set up the screen
-WIDTH, HEIGHT = 1500,1500
+WIDTH, HEIGHT = 1500, 1500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Pygame Character Movement")
 
@@ -28,57 +29,68 @@ player_image.fill(RED)
 teacher_image = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE))
 teacher_image.fill(BLUE)
 
+wall_image = pygame.Surface((ROOM_SIZE, ROOM_SIZE))
+wall_image.fill(BLACK)
+
 # Define Player class
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, x, y):
         super().__init__()
         self.image = player_image
-        self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH // 2, HEIGHT // 2)
+        self.rect = self.image.get_rect(center=(x, y))
 
-    def update(self, dx, dy):
+    def update(self, dx, dy, walls):
+        # Move player
         self.rect.x += dx
         self.rect.y += dy
-        self.rect.x = max(0, min(self.rect.x, WIDTH - PLAYER_SIZE))
-        self.rect.y = max(0, min(self.rect.y, HEIGHT - PLAYER_SIZE))
 
-# Define Room class
-class Room(pygame.sprite.Sprite):
-    def __init__(self, x, y, teacher_present=False):
+        # Check for collisions with walls
+        for wall in walls:
+            if self.rect.colliderect(wall.rect):
+                if dx > 0:
+                    self.rect.right = wall.rect.left
+                elif dx < 0:
+                    self.rect.left = wall.rect.right
+                elif dy > 0:
+                    self.rect.bottom = wall.rect.top
+                elif dy < 0:
+                    self.rect.top = wall.rect.bottom
+
+# Define Wall class
+class Wall(pygame.sprite.Sprite):
+    def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.Surface((ROOM_SIZE, ROOM_SIZE))
-        self.image.fill(WHITE)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-        self.teacher_present = teacher_present
+        self.image = wall_image
+        self.rect = self.image.get_rect(topleft=(x, y))
 
-    def draw_teacher(self):
-        if self.teacher_present:
-            screen.blit(teacher_image, (self.rect.x - camera.x + ROOM_SIZE // 2 - PLAYER_SIZE // 2, self.rect.y - camera.y + ROOM_SIZE // 2 - PLAYER_SIZE // 2))
+# Define Tunnel class
+class Tunnel(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.rect = pygame.Rect(x, y, ROOM_SIZE, ROOM_SIZE)
 
-# Create rooms
-rooms = pygame.sprite.Group()
+# Create tunnels and walls
+tunnels = pygame.sprite.Group()
+walls = pygame.sprite.Group()
 for i in range(5):
     for j in range(5):
-        if (i, j) == (2, 2):  # Room with teacher
-            room = Room((ROOM_SIZE + ROOM_MARGIN) * i, (ROOM_SIZE + ROOM_MARGIN) * j, teacher_present=True)
-        else:
-            room = Room((ROOM_SIZE + ROOM_MARGIN) * i, (ROOM_SIZE + ROOM_MARGIN) * j)
-        rooms.add(room)
+        x = i * (ROOM_SIZE + ROOM_MARGIN)
+        y = j * (ROOM_SIZE + ROOM_MARGIN)
+        if random.random() < 0.6:  # Create tunnel
+            tunnel = Tunnel(x, y)
+            tunnels.add(tunnel)
+        else:  # Create wall
+            wall = Wall(x, y)
+            walls.add(wall)
 
 # Create player
-player = Player()
+player = Player(WIDTH // 2, HEIGHT // 2)
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
-
-# Define camera
-camera = pygame.Rect(0, 0, WIDTH, HEIGHT)
 
 # Main loop
 running = True
 while running:
-    screen.fill(BLACK)
-
     # Handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -97,27 +109,14 @@ while running:
         dy += PLAYER_SPEED
 
     # Update player position
-    player.update(dx, dy)
+    player.update(dx, dy, walls)
 
-    # Adjust camera position to follow the player
-    camera.center = player.rect.center
-
-    # Draw rooms within the camera's view
-    for room in rooms:
-        if camera.colliderect(room.rect):
-            screen.blit(room.image, (room.rect.x - camera.x, room.rect.y - camera.y))
-            room.draw_teacher()
-
-    # Check if the player is in the room with the teacher
-    player_room = pygame.sprite.spritecollideany(player, rooms)
-    if player_room and player_room.teacher_present:
-        # Display message
-        font = pygame.font.Font(None, 36)
-        text = font.render("Hello everyone!", True, WHITE)
-        text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-        screen.blit(text, text_rect)
-
-    # Draw player
+    # Draw everything
+    screen.fill(WHITE)
+    for tunnel in tunnels:
+        pygame.draw.rect(screen, WHITE, tunnel.rect)
+    for wall in walls:
+        screen.blit(wall.image, wall.rect)
     all_sprites.draw(screen)
 
     # Update display
