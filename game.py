@@ -5,7 +5,7 @@ import sys
 pygame.init()
 
 # Set up the screen
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1500,1500
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Pygame Character Movement")
 
@@ -15,7 +15,7 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 
 # Define constants
-PLAYER_SIZE = 50
+PLAYER_SIZE = 20
 ROOM_SIZE = 200
 ROOM_MARGIN = 50
 PLAYER_SPEED = 5
