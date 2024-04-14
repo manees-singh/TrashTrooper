@@ -69,20 +69,20 @@ class HealthBar():
 class GreyRectangle(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.original_image = pygame.image.load('trash_pickup3.png').convert_alpha()  # Adjust size as needed
-        self.image = pygame.transform.scale(self.original_image, (20, 20))  # Scale down the image
+        self.image = pygame.Surface((10, 10))  # Adjust size as needed
+        self.image.fill((128, 128, 128))  # Grey color
         self.rect = self.image.get_rect(topleft=(x, y))
 
 class Monster(pygame.sprite.Sprite):
     def __init__(self, x, y, player):
         super().__init__()
-        self.original_image = pygame.image.load('trash_pickup3.png').convert_alpha()  # Adjust size as needed
-        self.image = pygame.transform.scale(self.original_image, (20, 20))  # Scale down the image
+        self.original_image = pygame.image.load('the_trash_monster.jpg').convert_alpha()  # Adjust size as needed
+        self.image = pygame.transform.scale(self.original_image, (70, 70))  # Scale down the image
         self.rect = self.image.get_rect(topleft=(x, y))
-
         self.player = player
         self.health = 100
         self.max_health = 100
+        self.speed = 3
 
     def draw_health_bar(self,camera_offset_x,camera_offset_y):
         # Calculate health bar dimensions
@@ -103,55 +103,44 @@ class Monster(pygame.sprite.Sprite):
         return health_bar_surface, health_bar_rect
     
     def update(self):
-        # Calculate direction towards player
-        dx = self.player.rect.centerx - self.rect.centerx
-        dy = self.player.rect.centery - self.rect.centery
-        distance = max(abs(dx), abs(dy))  # get the maximum absolute distance
-        if distance != 0:
-            dx = dx / distance
-            dy = dy / distance
-
-        # Move monster towards player
-        self.rect.x += dx
-        self.rect.y += dy
+        # Calculate distance to player
+        distance_to_player = pygame.math.Vector2(self.player.rect.center) - pygame.math.Vector2(self.rect.center)
+        if distance_to_player.length() < 400:  # Adjust this threshold as needed
+            # Move towards player
+            if distance_to_player.length() == 0:
+                dx = 0
+                dy = 0
+            else:
+                dx = distance_to_player.x / distance_to_player.length() * self.speed
+                dy = distance_to_player.y / distance_to_player.length() * self.speed
+                self.rect.x += dx
+                self.rect.y += dy
+        else:
+            # Move randomly
+            if random.randint(1,9) == 1:
+                
+                self.rect.x += random.randint(-self.speed*2, self.speed*2)
+                self.rect.y += random.randint(-self.speed*2, self.speed*2)
+            else:
+                pass
         
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.image = player_image
+        self.x = x
+        self.y = y
         self.rect = self.image.get_rect(center=(x, y))
 
-    def update(self, dx, dy, walls):
+    def update(self, dx, dy):
         # Move player
         new_rect = self.rect.move(dx, dy)
 
-        # Check for collisions with walls
-        for wall in walls:
-            if new_rect.colliderect(wall.rect):
-                if dx > 0:
-                    new_rect.right = wall.rect.left
-                elif dx < 0:
-                    new_rect.left = wall.rect.right
-                elif dy > 0:
-                    new_rect.bottom = wall.rect.top
-                elif dy < 0:
-                    new_rect.top = wall.rect.bottom
 
         # Update player position if no collisions
         self.rect = new_rect
 
-# Define Wall class
-class Wall(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = wall_image
-        self.rect = self.image.get_rect(topleft=(x, y))
 
-# Define Tunnel class
-class Tunnel(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.rect = pygame.Rect(x, y, ROOM_SIZE, ROOM_SIZE)
 
 #Define Button class
 class Button:
@@ -194,8 +183,8 @@ class Button:
 
 #Define StartButton subclass
 class StartButton(Button):
-    def __init__(self, x, y, w, h):
-        super().__init__(x, y, w, h, BLUE, 'START')
+    def __init__(self, x, y, w, h, text='START'):
+        super().__init__(x, y, w, h, BLUE, text)
 
     #Start the game
     def action(self):
@@ -226,19 +215,19 @@ class OptionsButton(Button):
 #Play the game
 def play_game():
     # Create tunnels and walls
-    tunnels = pygame.sprite.Group()
-    walls = pygame.sprite.Group()
     grey_rectangles = pygame.sprite.Group()
     for i in range(5):
         for j in range(5):
             x = i * (ROOM_SIZE + ROOM_MARGIN)
             y = j * (ROOM_SIZE + ROOM_MARGIN)
-            if random.random() < 0.6:  # Create tunnel
-                tunnel = Tunnel(x, y)
-                tunnels.add(tunnel)
-            else:  # Create wall
-                wall = Wall(x, y)
-                walls.add(wall)
+            # Create grey rectangle
+            grey_rect = GreyRectangle(random.randint(x, x + ROOM_SIZE), random.randint(y, y + ROOM_SIZE))
+            grey_rectangles.add(grey_rect)
+
+    for i in range(-50,50):
+        for j in range(-50,50):
+            x = i * (ROOM_SIZE + ROOM_MARGIN)
+            y = j * (ROOM_SIZE + ROOM_MARGIN)
             # Create grey rectangle
             grey_rect = GreyRectangle(random.randint(x, x + ROOM_SIZE), random.randint(y, y + ROOM_SIZE))
             grey_rectangles.add(grey_rect)
@@ -258,13 +247,12 @@ def play_game():
 
     #added healthbar
     health = HealthBar(250, 200, 300, 10, 100)
-    
+    timer = pygame.time.get_ticks() #initial timer
     # Main loop
     running = True
     while running:
 
 
-        
         # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -284,7 +272,7 @@ def play_game():
             pause_menu()
 
         # Check for collisions before updating player position
-        player.update(dx, dy, walls)
+        player.update(dx, dy)
 
         # Update monster position
         monster.update()
@@ -316,17 +304,6 @@ def play_game():
         # Draw everything with camera offset
         screen.fill(WHITE)
 
-        #tunnels
-        for tunnel in tunnels:
-            tunnel_rect = tunnel.rect.move(-camera_offset_x, -camera_offset_y)
-            if screen.get_rect().colliderect(tunnel_rect):
-                pygame.draw.rect(screen, WHITE, tunnel_rect)
-
-        #walls
-        for wall in walls:
-            wall_rect = wall.rect.move(-camera_offset_x, -camera_offset_y)
-            if screen.get_rect().colliderect(wall_rect):
-                screen.blit(wall.image, wall_rect)
 
         #trash
         for grey_rect in grey_rectangles:  # Draw grey rectangles after walls and tunnels
@@ -370,24 +347,57 @@ def play_game():
         # Update display
         pygame.display.flip()
 
+        current_time = pygame.time.get_ticks()
+        time_interval = 2000  # Interval in milliseconds (2 seconds)
+        if current_time - timer >= time_interval:
+            # Add a new grey rectangle
+            new_grey_rect = GreyRectangle(random.randint(0, WIDTH), random.randint(0, HEIGHT))
+            grey_rectangles.add(new_grey_rect)
+            timer = current_time  # Update the timer
+
         # Cap the frame rate
         pygame.time.Clock().tick(60)
 
 def game_over():
-    screen.fill(BLACK)
-   # Display game over text
-    font = pygame.font.Font('freesansbold.ttf', 64)
-    game_over_text = font.render('GAME OVER', True, RED)
-    game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-    screen.blit(game_over_text, game_over_rect)
-        # Update display
-    pygame.display.flip()
+    running = True
+    while running:
+        screen.fill(BLACK)
+        
+        #Display game over text
+        font = pygame.font.Font('freesansbold.ttf', 100)
+        game_over_text = font.render('GAME OVER', True, RED)
+        game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        screen.blit(game_over_text, game_over_rect)
 
-    # Wait for a moment before exiting (optional)
-    pygame.time.delay(2000)
+        #Create buttons
+        retry_button = StartButton(WIDTH // 3 - 150, HEIGHT // 4 * 3 - 60, 300, 120, 'RETRY')
+        quit_button = QuitButton(WIDTH // 3 * 2 - 150, HEIGHT // 4 * 3 - 60, 300, 120)
 
-    # Quit the game
-    quit_game()
+        #Draw buttons
+        retry_button.draw(screen)
+        quit_button.draw(screen)
+
+        #Hover over buttons
+        retry_button.hover()
+        quit_button.hover()
+
+        #Perform button actions if clicked
+        if retry_button.is_clicked():
+            running = False
+            retry_button.action()
+        if quit_button.is_clicked():
+            running = False
+            quit_button.action()
+
+        #Update display
+        pygame.display.flip()
+
+        #Close the window if required
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
 #Quit the game
 def quit_game():
     pygame.quit()
@@ -411,9 +421,9 @@ def start_menu():
         
         #Create header text
         font = pygame.font.Font('freesansbold.ttf', 100)
-        text = font.render('OUR EPIC GAME', True, WHITE, BLACK)
+        text = font.render('TRASH TROOPERS', True, WHITE, BLACK)
         text_rect = text.get_rect()
-        text_rect.center = (WIDTH // 2, 50)
+        text_rect.center = (WIDTH // 2, 100)
         screen.blit(text, text_rect)
 
         #Create buttons
