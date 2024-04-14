@@ -8,6 +8,7 @@ GAME TITLE: TRASH TROOPERS
 This is a video game developed using pygame, a python library.
 Your goal is to collect all of the trash on the screen.
 Trash will spawn in the middle area of the screen.
+
 CONTROLS:
 WASD- up,left,right,down
 Esc - to pause the game
