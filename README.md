@@ -1,5 +1,6 @@
 # hackku
 This is a repository for Hack KU 2024 project.
+
 This repository contains an executable file inside the build folder which can be downloaded to the system and one can enjoy playing this fun game. 
 GAME TITLE: TRASH TROOPERS
   This is a video game developed using pygame, a python library.
