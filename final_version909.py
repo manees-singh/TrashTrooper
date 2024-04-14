@@ -1,3 +1,4 @@
+#Import modules
 import pygame
 import sys
 import random
@@ -5,12 +6,15 @@ import random
 #Initialize Pygame
 pygame.init()
 pygame.mixer.init()
+
+#Get sound files
 strike_sound=pygame.mixer.Sound('collect.wav')
 game_over_sound=pygame.mixer.Sound("game_over.wav")
 background_sound=pygame.mixer.Sound("background.mp3")
 start_menu_sound=pygame.mixer.Sound("startmenu.wav")
 victory_sound=pygame.mixer.Sound("victory.wav")
 
+#Set volumes for sound files
 background_sound.set_volume(0.8)
 strike_sound.set_volume(0.8)
 game_over_sound.set_volume(0.3)
@@ -51,11 +55,7 @@ PLAYER_SPEED = 5
 player_image = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE))
 player_image.fill(RED)
 
-teacher_image = pygame.Surface((PLAYER_SIZE, PLAYER_SIZE))
-teacher_image.fill(BLUE)
-
-wall_image = pygame.Surface((ROOM_SIZE, ROOM_SIZE))
-wall_image.fill(BLACK)
+#Define HealthBar class
 class HealthBar():
     def __init__(self, x, y, w,h, max_h):
         self.x=x
@@ -65,24 +65,28 @@ class HealthBar():
         self.height = 20
         self.max_h=max_h
 
+    #Draw player's health bar
     def draw(self,surface):
         ratio= self.h/self.max_h
         pygame.draw.rect(surface, "red",(self.x, self.y, self.w, self.height))
         pygame.draw.rect(surface,"green",(self.x, self.y, self.w * ratio, self.height))
 
+    #Increase player's health
     def increase_health(self):
+        #Player's health cannot exceed the maximum health
         if self.h + 10 >= self.max_h:
             self.h = self.max_h
         else:
             self.h = self.h + 10
 
+    #Decrease player's health
     def decrease_health(self):
         if self.h - 1 <= 0:
             self.h = 0
-            # Game over logic can be added here
         else:
             self.h -= 1
 
+#Define GreyRectangle class (trash bag objects)
 class GreyRectangle(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -90,7 +94,7 @@ class GreyRectangle(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.original_image, (70, 70))  # Scale down the image
         self.rect = self.image.get_rect(topleft=(x, y))
 
-
+#Define Monster class
 class Monster(pygame.sprite.Sprite):
     def __init__(self, x, y, player):
         super().__init__()
@@ -103,42 +107,47 @@ class Monster(pygame.sprite.Sprite):
         self.speed = 4
         self.is_alive = True
 
+    #Set monster's health bar
     def draw_health_bar(self,camera_offset_x,camera_offset_y):
-        # Calculate health bar dimensions
+        #Calculate health bar dimensions
         bar_width = 40
         bar_height = 5
         health_ratio = self.health / self.max_health
         bar_width_current = int(bar_width * health_ratio)
 
-        # Create health bar surface
+        #Create health bar surface
         health_bar_surface = pygame.Surface((bar_width, bar_height))
         health_bar_surface.fill(RED)
         health_bar_surface.fill(GREEN, (0, 0, bar_width_current, bar_height))
 
-        # Position health bar above the monster
+        #Position health bar above the monster
         health_bar_rect = health_bar_surface.get_rect(center=(self.rect.centerx - camera_offset_x, self.rect.top-8 - camera_offset_y))
 
+        #Add health bar to screen if monster is alive
         if self.is_alive:
             health_bar_surface = pygame.Surface((bar_width, bar_height))
             health_bar_surface.fill(RED)
             health_bar_surface.fill(GREEN, (0, 0, bar_width_current, bar_height))
+        #Add invisible health bar to sceen if monster is killed
         else:
             health_bar_surface = pygame.Surface((bar_width, bar_height))
             health_bar_surface.fill(WHITE)
             health_bar_surface.fill(WHITE, (0, 0, bar_width_current, bar_height))
         # Return the health bar surface and rectangle
         return health_bar_surface, health_bar_rect
-    
+
+    #Update monster's properties
     def update(self):
+        #Kill monster if its health is reduced to 0
         if self.health <= 0:
             self.kill()
             self.is_alive = False
             self.image.fill(WHITE)
             return
-        # Calculate distance to player
+        #Calculate distance to player
         distance_to_player = pygame.math.Vector2(self.player.rect.center) - pygame.math.Vector2(self.rect.center)
         if distance_to_player.length() < 400:  # Adjust this threshold as needed
-            # Move towards player
+            #Move towards player
             if distance_to_player.length() == 0:
                 dx = 0
                 dy = 0
@@ -148,14 +157,12 @@ class Monster(pygame.sprite.Sprite):
                 self.rect.x += dx
                 self.rect.y += dy
         else:
-            # Move randomly
+            #Move randomly
             if random.randint(1,9) == 1:
-                
                 self.rect.x += random.randint(-self.speed*2, self.speed*2)
                 self.rect.y += random.randint(-self.speed*2, self.speed*2)
-            else:
-                pass
-        
+
+#Define Player class  
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -167,14 +174,16 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.hitbox = None
         self.enemy_list = []
+
+    #Update the player's position
     def update(self, dx, dy):
-        # Move player
+        #Move player
         new_rect = self.rect.move(dx, dy)
 
-
-        # Update player position if no collisions
+        #Update player position if no collisions
         self.rect = new_rect
 
+    #Attack the trash monsters
     def attack(self):
         if self.hitbox.rect.colliderect(self.enemy_list[0].rect):
             self.enemy_list[0].health -= 5
@@ -183,7 +192,7 @@ class Player(pygame.sprite.Sprite):
         elif self.hitbox.rect.colliderect(self.enemy_list[2].rect):
             self.enemy_list[2].health -= 5
 
-
+#Define AttackHitbox class
 class AttackHitbox(pygame.sprite.Sprite):
     def __init__(self, player):
         super().__init__()
@@ -194,7 +203,8 @@ class AttackHitbox(pygame.sprite.Sprite):
         self.follow_speed = 1/4
         self.rect.center = self.player.rect.center
         player.hitbox = self
-        
+
+    #Update the position of the hitbox
     def update(self):
         self.rect.center = self.player.rect.center
 
@@ -220,7 +230,7 @@ class Button:
         self.text_rect.center = (self.x + (self.width/2), self.y + (self.height/2))
         screen.blit(self.text, self.text_rect)
 
-    #Change button color when mouse hovers over button
+    #Change button color to magenta when mouse hovers over button
     def hover(self):
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
@@ -261,48 +271,48 @@ class ResumeButton(Button):
     def __init__(self, x, y, w, h):
         super().__init__(x, y, w, h, BLUE, 'RESUME')
 
-#Define OptionButton subclass
-class OptionsButton(Button):
-    def __init__(self, x, y, w, h):
-        super().__init__(x, y, w, h, GREEN, 'OPTIONS')
-
-    def action(self):
-        pass
-
 #Play the game
 def play_game():
-    # Create tunnels and walls
+    #Create a group for the trash objects
     grey_rectangles = pygame.sprite.Group()
+
+    #Generate trash objects
     for i in range(5):
         for j in range(5):
             x = i * (ROOM_SIZE + ROOM_MARGIN)
             y = j * (ROOM_SIZE + ROOM_MARGIN)
-            # Create grey rectangle
+            # Create trash objects and add them to the trash objects group
             grey_rect = GreyRectangle(random.randint(x, x + ROOM_SIZE), random.randint(y, y + ROOM_SIZE))
             grey_rectangles.add(grey_rect)
 
+    #Generate trash objects
     for i in range(1,3):
         for j in range(1,3):
             x = i * (ROOM_SIZE + ROOM_MARGIN)
             y = j * (ROOM_SIZE + ROOM_MARGIN)
-            # Create grey rectangle
+            
+            #Create trash objects and add them to the trash objects group
             grey_rect = GreyRectangle(random.randint(x, x + ROOM_SIZE), random.randint(y, y + ROOM_SIZE))
             grey_rectangles.add(grey_rect)
-    # Create player
+            
+    #Create the player and add it to the sprites group
     player = Player(WIDTH // 2, HEIGHT // 2)
     all_sprites = pygame.sprite.Group()
     all_sprites.add(player)
 
+    #Create an attack hitbox object and add it to the sprites group
     attack_hitbox = AttackHitbox(player)
     all_sprites.add(attack_hitbox)
 
-    # Create monster
+    #Create monster objects
     monster = Monster(WIDTH // 3, HEIGHT // 3, player)
     monster2 = Monster(0, 0,player)
     monster3 = Monster(WIDTH // 4, HEIGHT, player)
 
+    #Store the three monster objects in the player's enemy list
     player.enemy_list = [monster, monster2, monster3]
-    
+
+    #Add monsters to the sprites group
     all_sprites.add(monster)
     all_sprites.add(monster2)
     all_sprites.add(monster3)
@@ -310,9 +320,11 @@ def play_game():
     #added healthbar
     health = HealthBar(50, 50, 300, 10, 300)
     timer = pygame.time.get_ticks() #initial timer
+    
     # Main loop
     running = True
     while running:
+        #Play the background sound
         background_sound.play()
 
         # Handle events
@@ -320,23 +332,30 @@ def play_game():
             if event.type == pygame.QUIT:
                 running = False
                 
-        # Check for collisions with grey rectangles
+        # Check for collisions with trash objects
         collided_grey_rectangles = pygame.sprite.spritecollide(player, grey_rectangles, True)
         for grey_rect in collided_grey_rectangles:
-            # Remove grey rectangle from the group
+            # Remove trash object from the group
             grey_rectangles.remove(grey_rect)
             health.increase_health()
             channel2.play(strike_sound)
 
+        #Go to victory menu if all trash objects have been removed
         if len(grey_rectangles) == 0:
-            print("All grey rectangles have been picked up!")
             victory_menu()
-        # Get key presses
+            
+        #Get key presses
         keys = pygame.key.get_pressed()
+
+        #WASD and arrow keys move the player
         dx = ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) - (keys[pygame.K_LEFT] or keys[pygame.K_a])) * PLAYER_SPEED
         dy = ((keys[pygame.K_DOWN] or keys[pygame.K_s]) - (keys[pygame.K_UP] or keys[pygame.K_w])) * PLAYER_SPEED
+
+        #Escape key loads the pause menu
         if keys[pygame.K_ESCAPE]:
             pause_menu()
+
+        #Space key causes the player to attack the trash monsters
         if keys[pygame.K_SPACE]:
             player.attack()
 
@@ -375,39 +394,36 @@ def play_game():
         screen.fill(WHITE)
 
 
-        #trash
-        for grey_rect in grey_rectangles:  # Draw grey rectangles after walls and tunnels
+        #Add trash objects to the screen
+        for grey_rect in grey_rectangles:
             grey_rect_rect = grey_rect.rect.move(-camera_offset_x, -camera_offset_y)
             if screen.get_rect().colliderect(grey_rect_rect):
                 screen.blit(grey_rect.image, grey_rect_rect)      
 
+        #Get the player object rectangle
         player_rect = player.rect.move(-camera_offset_x, -camera_offset_y)
 
-        #player
+        #Add player object to the screen
         if screen.get_rect().colliderect(player_rect):
             screen.blit(player.image, player_rect)
 
-        #monster
+        #Add monster objects to the screen
         monster_rect = monster.rect.move(-camera_offset_x, -camera_offset_y)
         if screen.get_rect().colliderect(monster_rect):
             screen.blit(monster.image, monster_rect)
-
         monster_rect2 = monster2.rect.move(-camera_offset_x, -camera_offset_y)
         if screen.get_rect().colliderect(monster_rect2):
             screen.blit(monster2.image, monster_rect2)
-
         monster_rect3 = monster3.rect.move(-camera_offset_x, -camera_offset_y)
         if screen.get_rect().colliderect(monster_rect3):
             screen.blit(monster3.image, monster_rect3)
 
 
-        # Draw monster health bar
+        # Draw the monster health bars
         health_bar_surface, health_bar_rect = monster.draw_health_bar(camera_offset_x,camera_offset_y)
         screen.blit(health_bar_surface, health_bar_rect)
-
         health_bar_surface2, health_bar_rect2 = monster2.draw_health_bar(camera_offset_x,camera_offset_y)
         screen.blit(health_bar_surface2, health_bar_rect2)
-
         health_bar_surface3, health_bar_rect3 = monster3.draw_health_bar(camera_offset_x,camera_offset_y)
         screen.blit(health_bar_surface3, health_bar_rect3)
         
@@ -417,14 +433,17 @@ def play_game():
         # Update display
         pygame.display.flip()
 
+        #Get current time
         current_time = pygame.time.get_ticks()
         time_interval = 10000  # Interval in milliseconds (2 seconds)
+
+        #Add a new trash object to the screen every 10 seconds
         i = random.randint(1,2)
         j = random.randint(1,2)
         x = i*(ROOM_SIZE + ROOM_MARGIN)
         y = j * (ROOM_SIZE + ROOM_MARGIN)
         if current_time - timer >= time_interval:
-            # Add a new grey rectangle
+            # Add a new trash object
             new_grey_rect = GreyRectangle(x,y)
             grey_rectangles.add(new_grey_rect)
             timer = current_time  # Update the timer
@@ -433,11 +452,14 @@ def play_game():
         pygame.time.Clock().tick(60)
 
 def game_over():
-    running = True
+    #Play victory music and stop other music
     background_sound.stop()
     game_over_sound.play()
+
+    #Run menu loop until a button is clicked
+    running = True
     while running:
-        
+        #Set black background
         screen.fill(BLACK)
         
         #Display game over text
@@ -474,11 +496,17 @@ def game_over():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+#Create the victory menu
 def victory_menu():
+    #Play victory music and stop other music
     background_sound.stop()
     victory_sound.play(-1)
+
+    #Run menu loop until a button is clicked
     running = True
     while running:
+        #Set black background
         screen.fill(BLACK)
         
         #Display game over text
@@ -516,6 +544,7 @@ def victory_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
 #Quit the game
 def quit_game():
     pygame.quit()
@@ -523,22 +552,17 @@ def quit_game():
 
 #Create the start menu
 def start_menu():
-
     start_menu_sound.play()
+    
     #Set the background surface
     background = pygame.Surface(window)
 
-
-    
+    #Run menu loop until a button is clicked
     running = True
     while True:
-
-        
-        #Set background
+        #Set black background
         screen.blit(background, (0, 0))
 
-        
-        
         #Create header text
         font = pygame.font.Font('freesansbold.ttf', 100)
         text = font.render('TRASH TROOPERS', True, WHITE, BLACK)
@@ -563,7 +587,6 @@ def start_menu():
             running = False
             start_menu_sound.stop()
             start_button.action()
-            
         if quit_button.is_clicked():
             running = False
             quit_button.action()
@@ -580,9 +603,9 @@ def start_menu():
 #Create the pause menu
 def pause_menu():
     #Set the background surface
-    
     background = pygame.Surface(window)
 
+    #Run menu loop until a button is clicked
     running = True
     while True:
         #Set background
