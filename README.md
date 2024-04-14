@@ -15,6 +15,8 @@ Careful, though, when you are close enough to attack,
 they dangerously close to you already.
 
 As you collect trash, your health bar will go up.
+There will be one trash added to the screen every 10 seconds,
+so be quick!
 
 However, the trash monsters will quickly lower your
 health when they run into you.
