@@ -81,9 +81,10 @@ class Monster(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.original_image, (70, 70))  # Scale down the image
         self.rect = self.image.get_rect(topleft=(x, y))
         self.player = player
-        self.health = 100
-        self.max_health = 100
-        self.speed = 3
+        self.health = 150
+        self.max_health = 150
+        self.speed = 4
+        self.is_alive = True
 
     def draw_health_bar(self,camera_offset_x,camera_offset_y):
         # Calculate health bar dimensions
@@ -100,10 +101,23 @@ class Monster(pygame.sprite.Sprite):
         # Position health bar above the monster
         health_bar_rect = health_bar_surface.get_rect(center=(self.rect.centerx - camera_offset_x, self.rect.top-8 - camera_offset_y))
 
+        if self.is_alive:
+            health_bar_surface = pygame.Surface((bar_width, bar_height))
+            health_bar_surface.fill(RED)
+            health_bar_surface.fill(GREEN, (0, 0, bar_width_current, bar_height))
+        else:
+            health_bar_surface = pygame.Surface((bar_width, bar_height))
+            health_bar_surface.fill(WHITE)
+            health_bar_surface.fill(WHITE, (0, 0, bar_width_current, bar_height))
         # Return the health bar surface and rectangle
         return health_bar_surface, health_bar_rect
     
     def update(self):
+        if self.health <= 0:
+            self.kill()
+            self.is_alive = False
+            self.image.fill(WHITE)
+            return
         # Calculate distance to player
         distance_to_player = pygame.math.Vector2(self.player.rect.center) - pygame.math.Vector2(self.rect.center)
         if distance_to_player.length() < 400:  # Adjust this threshold as needed
@@ -134,7 +148,8 @@ class Player(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.rect = self.image.get_rect(center=(x, y))
-
+        self.hitbox = None
+        self.enemy_list = []
     def update(self, dx, dy):
         # Move player
         new_rect = self.rect.move(dx, dy)
@@ -143,6 +158,28 @@ class Player(pygame.sprite.Sprite):
         # Update player position if no collisions
         self.rect = new_rect
 
+    def attack(self):
+        if self.hitbox.rect.colliderect(self.enemy_list[0].rect):
+            self.enemy_list[0].health -= 5
+        elif self.hitbox.rect.colliderect(self.enemy_list[1].rect):
+            self.enemy_list[1].health -= 5
+        elif self.hitbox.rect.colliderect(self.enemy_list[2].rect):
+            self.enemy_list[2].health -= 5
+
+
+class AttackHitbox(pygame.sprite.Sprite):
+    def __init__(self, player):
+        super().__init__()
+        self.image = pygame.Surface((100,100))
+        self.image.fill(YELLOW)
+        self.rect = self.image.get_rect()
+        self.player = player
+        self.follow_speed = 1/4
+        self.rect.center = self.player.rect.center
+        player.hitbox = self
+        
+    def update(self):
+        self.rect.center = self.player.rect.center
 
 
 #Define Button class
@@ -239,10 +276,15 @@ def play_game():
     all_sprites = pygame.sprite.Group()
     all_sprites.add(player)
 
+    attack_hitbox = AttackHitbox(player)
+    all_sprites.add(attack_hitbox)
+
     # Create monster
     monster = Monster(WIDTH // 3, HEIGHT // 3, player)
     monster2 = Monster(0, 0,player)
     monster3 = Monster(WIDTH, HEIGHT, player)
+
+    player.enemy_list = [monster, monster2, monster3]
     
     all_sprites.add(monster)
     all_sprites.add(monster2)
@@ -277,28 +319,31 @@ def play_game():
         dy = ((keys[pygame.K_DOWN] or keys[pygame.K_s]) - (keys[pygame.K_UP] or keys[pygame.K_w])) * PLAYER_SPEED
         if keys[pygame.K_ESCAPE]:
             pause_menu()
+        if keys[pygame.K_SPACE]:
+            player.attack()
 
         # Check for collisions before updating player position
         player.update(dx, dy)
+        attack_hitbox.update()
 
         # Update monster position
         monster.update()
         monster2.update()
         monster3.update()
 
-        if player.rect.colliderect(monster.rect):
+        if player.rect.colliderect(monster.rect) and monster.is_alive:
             # Decrease player's health
             health.decrease_health()
             if health.h <= 0:
                 game_over()
 
-        if player.rect.colliderect(monster2.rect):
+        if player.rect.colliderect(monster2.rect) and monster2.is_alive:
             # Decrease player's health
             health.decrease_health()
             if health.h <= 0:
                 game_over()
 
-        if player.rect.colliderect(monster3.rect):
+        if player.rect.colliderect(monster3.rect) and monster3.is_alive:
             # Decrease player's health
             health.decrease_health()
             if health.h <= 0:
@@ -472,22 +517,19 @@ def start_menu():
         font = pygame.font.Font('freesansbold.ttf', 100)
         text = font.render('TRASH TROOPERS', True, WHITE, BLACK)
         text_rect = text.get_rect()
-        text_rect.center = (WIDTH // 2, 100)
+        text_rect.center = (WIDTH // 2, HEIGHT // 6)
         screen.blit(text, text_rect)
 
         #Create buttons
-        start_button = StartButton(WIDTH // 2 - 150, HEIGHT // 4 - 60, 300, 120)
-        options_button = OptionsButton(WIDTH // 2 - 150, HEIGHT // 2 - 60, 300, 120)
-        quit_button = QuitButton(WIDTH // 2 - 150, HEIGHT // 4 * 3 - 60, 300, 120)
+        start_button = StartButton(WIDTH // 2 - 150, HEIGHT // 3 - 60, 300, 120)
+        quit_button = QuitButton(WIDTH // 2 - 150, HEIGHT // 3 * 2 - 60, 300, 120)
 
         #Draw buttons
         start_button.draw(screen)
-        options_button.draw(screen)
         quit_button.draw(screen)
 
         #Hover over buttons
         start_button.hover()
-        options_button.hover()
         quit_button.hover()
 
         #Perform button actions if clicked
@@ -521,22 +563,19 @@ def pause_menu():
         font = pygame.font.Font('freesansbold.ttf', 100)
         text = font.render('GAME PAUSED', True, WHITE, BLACK)
         text_rect = text.get_rect()
-        text_rect.center = (WIDTH // 2, 50)
+        text_rect.center = (WIDTH // 2, HEIGHT // 6)
         screen.blit(text, text_rect)
 
         #Create buttons
-        resume_button = ResumeButton(WIDTH // 2 - 150, HEIGHT // 4 - 60, 300, 120)
-        options_button = OptionsButton(WIDTH // 2 - 150, HEIGHT // 2 - 60, 300, 120)
-        quit_button = QuitButton(WIDTH // 2 - 150, HEIGHT // 4 * 3 - 60, 300, 120)
+        resume_button = ResumeButton(WIDTH // 2 - 150, HEIGHT // 3 - 60, 300, 120)
+        quit_button = QuitButton(WIDTH // 2 - 150, HEIGHT // 3 * 2 - 60, 300, 120)
 
         #Draw buttons
         resume_button.draw(screen)
-        options_button.draw(screen)
         quit_button.draw(screen)
 
         #Hover over buttons
         resume_button.hover()
-        options_button.hover()
         quit_button.hover()
 
         #Perform button actions if clicked
