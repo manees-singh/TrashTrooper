@@ -1,13 +1,14 @@
 # hackku
 This is a repository for Hack KU 2024 project.
 GAME TITLE: TRASH TROOPERS
-  This is a video game done in python using pygame.
+  This is a video game developed using pygame, a python library.
 Your goal is to collect all of the trash on the screen.
 Trash will spawn in the middle area of the screen.
 CONTROLS:
-wasd - up,left,right,down
+WASD- up,left,right,down
+Esc - to pause the game
 or
-up arrow, left arrow, down arrow, and right arrow.
+Up arrow, Left arrow, Down arrow, and Right arrow.
 
 Also, if the trash monster gets close enough,
 hold the space bar to attack the trash monsters.
