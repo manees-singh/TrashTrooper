@@ -227,8 +227,8 @@ def play_game():
             grey_rect = GreyRectangle(random.randint(x, x + ROOM_SIZE), random.randint(y, y + ROOM_SIZE))
             grey_rectangles.add(grey_rect)
 
-    for i in range(1,5):
-        for j in range(1,5):
+    for i in range(1,3):
+        for j in range(1,3):
             x = i * (ROOM_SIZE + ROOM_MARGIN)
             y = j * (ROOM_SIZE + ROOM_MARGIN)
             # Create grey rectangle
@@ -249,7 +249,7 @@ def play_game():
     all_sprites.add(monster3)
 
     #added healthbar
-    health = HealthBar(250, 200, 300, 10, 100)
+    health = HealthBar(250, 200, 300, 10, 300)
     timer = pygame.time.get_ticks() #initial timer
     # Main loop
     running = True
@@ -267,6 +267,10 @@ def play_game():
             # Remove grey rectangle from the group
             grey_rectangles.remove(grey_rect)
             health.increase_health()
+
+        if len(grey_rectangles) == 0:
+            print("All grey rectangles have been picked up!")
+            victory_menu()
         # Get key presses
         keys = pygame.key.get_pressed()
         dx = ((keys[pygame.K_RIGHT] or keys[pygame.K_d]) - (keys[pygame.K_LEFT] or keys[pygame.K_a])) * PLAYER_SPEED
@@ -351,10 +355,14 @@ def play_game():
         pygame.display.flip()
 
         current_time = pygame.time.get_ticks()
-        time_interval = 2000  # Interval in milliseconds (2 seconds)
+        time_interval = 10000  # Interval in milliseconds (2 seconds)
+        i = random.randint(1,2)
+        j = random.randint(1,2)
+        x = i*(ROOM_SIZE + ROOM_MARGIN)
+        y = j * (ROOM_SIZE + ROOM_MARGIN)
         if current_time - timer >= time_interval:
             # Add a new grey rectangle
-            new_grey_rect = GreyRectangle(random.randint(0, WIDTH), random.randint(0, HEIGHT))
+            new_grey_rect = GreyRectangle(x,y)
             grey_rectangles.add(new_grey_rect)
             timer = current_time  # Update the timer
 
@@ -400,7 +408,45 @@ def game_over():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+def victory_menu():
+    running = True
+    while running:
+        screen.fill(BLACK)
+        
+        #Display game over text
+        font = pygame.font.Font('freesansbold.ttf', 100)
+        game_over_text = font.render('VICTORY', True, GREEN)
+        game_over_rect = game_over_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        screen.blit(game_over_text, game_over_rect)
 
+        #Create buttons
+        retry_button = StartButton(WIDTH // 3 - 150, HEIGHT // 4 * 3 - 60, 300, 120, 'RETRY')
+        quit_button = QuitButton(WIDTH // 3 * 2 - 150, HEIGHT // 4 * 3 - 60, 300, 120)
+
+        #Draw buttons
+        retry_button.draw(screen)
+        quit_button.draw(screen)
+
+        #Hover over buttons
+        retry_button.hover()
+        quit_button.hover()
+
+        #Perform button actions if clicked
+        if retry_button.is_clicked():
+            running = False
+            retry_button.action()
+        if quit_button.is_clicked():
+            running = False
+            quit_button.action()
+
+        #Update display
+        pygame.display.flip()
+
+        #Close the window if required
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 #Quit the game
 def quit_game():
     pygame.quit()
