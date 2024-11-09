@@ -26,6 +26,7 @@ This is a repository for Hack KU 2024 project..
   - You can de-aggravate the monsters by moving away from their range.
   - Be cautious when attacking – the monsters are already dangerously close when you’re within attack range.
 
+If you want to try out the game yourself, download the trashtrooper.exe file from [v1.0 release](https://github.com/manees-singh/TrashTrooper/releases/tag/v1.0) 
 ## Tips for Success
 - Start moving immediately after loading the game to avoid an early encounter with the monsters.
 - Stay aware of your position relative to the trash and monsters to plan your movement and attacks effectively.
