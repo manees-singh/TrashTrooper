@@ -1,6 +1,8 @@
 # Hack KU 2024 Project: Trash Troopers
 
-![Trash Troopers Banner](banner.png) <!-- Replace with an actual image link if available -->
+<p align="center">
+  <img src="link-to-image/banner.png" alt="Trash Troopers Banner">
+</p>
 
 **Trash Troopers** is an immersive, fast-paced video game developed using the powerful `pygame` library in Python. In this game, players embark on an engaging mission to collect trash scattered across the screen while battling formidable trash monsters. Quick reflexes and strategic gameplay are your best allies as you tackle this challenge!
 
