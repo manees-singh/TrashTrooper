@@ -1,32 +1,34 @@
 # hackku
-This is a repository for Hack KU 2024 project.
+This is a repository for Hack KU 2024 project.. 
 
-This repository contains an executable file inside the build folder which can be downloaded to the system and one can enjoy playing this fun game. 
+# Trash Troopers
 
-GAME TITLE: TRASH TROOPERS
+**Trash Troopers** is an engaging video game developed using the `pygame` library in Python. Your mission is simple yet thrilling: collect all the trash on the screen while avoiding and battling trash monsters. Dive into a fast-paced environment where quick reflexes and strategic movement are key to survival.
 
-This is a video game developed using pygame, a python library.
-Your goal is to collect all of the trash on the screen.
-Trash will spawn in the middle area of the screen.
+## Gameplay Overview
+- **Objective**: Collect all the trash scattered on the screen.
+- **Challenge**: Trash will spawn in the middle area of the screen, but be on the lookout for aggressive trash monsters. They will try to deplete your health as they move toward you.
 
-CONTROLS:
-WASD- up,left,right,down
-Esc - to pause the game
-or
-Up arrow, Left arrow, Down arrow, and Right arrow.
+## Controls
+- **Movement**:
+  - **WASD**: Move up, left, right, and down.
+  - **Arrow Keys**: Alternate option for movement.
+- **Pause**:
+  - **Esc**: Pause the game.
+- **Attack**:
+  - **Space Bar**: Hold to attack trash monsters when they are within range.
 
-Also, if the trash monster gets close enough,
-hold the space bar to attack the trash monsters.
-Careful, though, when you are close enough to attack,
-they dangerously close to you already.
+## Game Mechanics
+- **Health Bar**: Your health bar will increase as you collect trash. However, contact with the trash monsters will reduce your health rapidly, so stay vigilant!
+- **Trash Spawning**: A new piece of trash will appear on the screen every 10 seconds. Speed and precision are essential to keep up with the increasing number of trash pieces.
+- **Monster Behavior**:
+  - Trash monsters patrol the area and will chase you if you come too close.
+  - You can de-aggravate the monsters by moving away from their range.
+  - Be cautious when attacking – the monsters are already dangerously close when you’re within attack range.
 
-As you collect trash, your health bar will go up.
-There will be one trash added to the screen every 10 seconds,
-so be quick!
+## Tips for Success
+- Start moving immediately after loading the game to avoid an early encounter with the monsters.
+- Stay aware of your position relative to the trash and monsters to plan your movement and attacks effectively.
+- Use the pause feature (`Esc`) if you need a moment to strategize or take a break.
 
-However, the trash monsters will quickly lower your
-health when they run into you.
-When you load the game, you will quickly have to start moving to pickup trash,
-as the trash monsters will try to attack you. You will aggrevate the trash monsters to
-attack you when you enter their general area. They will de-aggrevate if you move far
-enough away.
+Dive into **Trash Troopers** and test your reflexes and strategy skills. Can you conquer the trash monsters and clean up the environment? Good luck!
